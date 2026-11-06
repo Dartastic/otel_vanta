@@ -1,15 +1,16 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_vanta_suppression.dart';
 
 const _tracerName = 'dartastic_otel_libs_vanta';
 
-Tracer _tracer() => OTel.tracerProvider().getTracer(_tracerName);
+APITracer _tracer() => OTelAPI.tracerProvider().getTracer(_tracerName);
 
 class VantaResult {
+  /// Creates a result.
   const VantaResult({
     this.organizationId,
     this.framework,
@@ -69,8 +70,13 @@ class VantaResult {
   final int? statusCode;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class VantaCallResult<T> {
+  /// Creates a call result.
   const VantaCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final VantaResult? result;
 }
@@ -97,50 +103,50 @@ Future<T> tracedVanta<T>({
   final span = _tracer().startSpan(
     'vanta $operation',
     kind: SpanKind.client,
-    attributes: OTel.attributesFromMap(m),
+    attributes: OTelAPI.attributesFromMap(m),
   );
   try {
     final r = await invoke();
     if (r.result != null) {
       final extras = <Attribute<Object>>[];
       if (r.result!.organizationId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'vanta.organization.id',
           r.result!.organizationId!,
         ));
       }
       if (r.result!.framework != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'vanta.framework',
           r.result!.framework!,
         ));
       }
       if (r.result!.controlId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'vanta.control.id',
           r.result!.controlId!,
         ));
       }
       if (r.result!.testId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'vanta.test.id',
           r.result!.testId!,
         ));
       }
       if (r.result!.resourceKind != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'vanta.resource.kind',
           r.result!.resourceKind!,
         ));
       }
       if (r.result!.resourceId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'vanta.resource.id',
           r.result!.resourceId!,
         ));
       }
       if (r.result!.testStatus != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'vanta.test.status',
           r.result!.testStatus!,
         ));
@@ -152,49 +158,49 @@ Future<T> tracedVanta<T>({
         }
       }
       if (r.result!.severity != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'vanta.severity',
           r.result!.severity!,
         ));
       }
       if (r.result!.failingCount != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'vanta.failing.count',
           r.result!.failingCount!,
         ));
       }
       if (r.result!.passingCount != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'vanta.passing.count',
           r.result!.passingCount!,
         ));
       }
       if (r.result!.deactivatedCount != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'vanta.deactivated.count',
           r.result!.deactivatedCount!,
         ));
       }
       if (r.result!.dueDateSec != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'vanta.due_date_sec',
           r.result!.dueDateSec!,
         ));
       }
       if (r.result!.evidenceId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'vanta.evidence.id',
           r.result!.evidenceId!,
         ));
       }
       if (r.result!.integrationSlug != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'vanta.integration.slug',
           r.result!.integrationSlug!,
         ));
       }
       if (r.result!.statusCode != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'http.response.status_code',
           r.result!.statusCode!,
         ));
@@ -205,13 +211,13 @@ Future<T> tracedVanta<T>({
           );
         }
       }
-      if (extras.isNotEmpty) span.addAttributes(OTel.attributes(extras));
+      if (extras.isNotEmpty) span.addAttributes(OTelAPI.attributes(extras));
     }
     return r.value;
   } catch (e, st) {
-    span.addAttributes(OTel.attributes([
-      OTel.attributeString(
-        ErrorResource.errorType.key,
+    span.addAttributes(OTelAPI.attributes([
+      OTelAPI.attributeString(
+        ErrorAttributes.errorType.key,
         e.runtimeType.toString(),
       ),
     ]));
